@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>七脉轮颜色自测</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-base:#0d0a1a;
+    --bg-glow:#241a3d;
+    --text-primary:#f2eef9;
+    --text-muted:#948ca8;
+    --card-bg:rgba(255,255,255,0.035);
+    --card-border:rgba(255,255,255,0.09);
+
+    --c-root:#c0392b;
+    --c-sacral:#dd7a2c;
+    --c-solar:#d3a62e;
+    --c-heart:#4e9e6d;
+    --c-throat:#3a86b8;
+    --c-eye:#5b52b0;
+    --c-crown:#9a63d4;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 0%, var(--bg-glow) 0%, transparent 60%),
+      var(--bg-base);
+    color:var(--text-primary);
+    font-family:'Noto Sans SC', sans-serif;
+    font-weight:300;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* faint stars */
+  .stars{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.5), transparent),
+      radial-gradient(1px 1px at 70% 15%, rgba(255,255,255,.35), transparent),
+      radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,.3), transparent),
+      radial-gradient(1.5px 1.5px at 85% 60%, rgba(255,255,255,.4), transparent),
+      radial-gradient(1px 1px at 10% 85%, rgba(255,255,255,.3), transparent),
+      radial-gradient(1px 1px at 60% 45%, rgba(255,255,255,.25), transparent);
+    background-repeat:no-repeat;
+  }
+
+  .app{
+    position:relative; z-index:1;
+    max-width:920px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+    display:flex;
+    gap:36px;
+  }
+
+  header.top{
+    text-align:center;
+    margin:6px auto 30px;
+    max-width:920px;
+    padding:0 20px;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.28em;
+    color:var(--text-muted);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  h1.title{
+    font-family:'Noto Serif SC', serif;
+    font-weight:700;
+    font-size:clamp(26px,4.5vw,38px);
+    margin:0;
+    background:linear-gradient(90deg,#e8b64a,#c86bd6 60%,#6f8fd6);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  /* ---------- spine column ---------- */
+  .spine-wrap{
+    flex:0 0 64px;
+    display:flex;
+    flex-direction:column-reverse;
+    align-items:center;
+    position:sticky;
+    top:24px;
+    height:fit-content;
+    gap:18px;
+    padding:20px 0;
+  }
+  .spine-line{
+    position:absolute;
+    left:50%; top:20px; bottom:20px;
+    width:2px;
+    transform:translateX(-50%);
+    background:linear-gradient(to top,
+      var(--c-root),var(--c-sacral),var(--c-solar),
+      var(--c-heart),var(--c-throat),var(--c-eye),var(--c-crown));
+    opacity:.18;
+    z-index:0;
+  }
+  .orb{
+    position:relative;
+    z-index:1;
+    width:22px;height:22px;
+    border-radius:50%;
+    border:1.5px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.04);
+    transition:all .5s cubic-bezier(.22,1,.36,1);
+  }
+  .orb.done{
+    border-color:transparent;
+    box-shadow:0 0 14px 2px var(--glow-color), 0 0 3px 1px var(--glow-color);
+    background:var(--glow-color);
+  }
+  .orb.active{
+    border-color:var(--glow-color);
+    animation:breathe 2.6s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform:scale(1); box-shadow:0 0 6px 1px var(--glow-color);}
+    50%{ transform:scale(1.28); box-shadow:0 0 18px 4px var(--glow-color);}
+  }
+
+  main{flex:1; min-width:0;}
+
+  /* ---------- intro ---------- */
+  .panel{
+    background:var(--card-bg);
+    border:1px solid var(--card-border);
+    border-radius:20px;
+    padding:34px 30px;
+    backdrop-filter:blur(6px);
+  }
+  .lede{color:var(--text-muted); line-height:1.9; font-size:15px; margin:0 0 22px;}
+  .scale-key{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin:20px 0 28px;
+  }
+  .scale-key div{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    padding:12px 8px;
+    text-align:center;
+    font-size:13px;
+    color:var(--text-muted);
+  }
+  .scale-key div b{display:block; color:var(--text-primary); font-size:18px; font-family:'Noto Serif SC',serif; margin-bottom:4px;}
+
+  button.cta{
+    appearance:none; border:none; cursor:pointer;
+    font-family:'Noto Sans SC',sans-serif;
+    font-size:15px; font-weight:500;
+    color:#1a1425;
+    background:linear-gradient(90deg,#e8b64a,#dd7a2c);
+    padding:14px 30px;
+    border-radius:999px;
+    letter-spacing:.02em;
+    transition:transform .25s ease, box-shadow .25s ease;
+    box-shadow:0 8px 24px -8px rgba(221,122,44,.6);
+  }
+  button.cta:hover{ transform:translateY(-2px); box-shadow:0 12px 28px -8px rgba(221,122,44,.75); }
+  button.cta:active{ transform:translateY(0); }
+  button.cta.ghost{
+    background:transparent;
+    color:var(--text-muted);
+    box-shadow:none;
+    border:1px solid var(--card-border);
+  }
+  button.cta:disabled{ opacity:.35; cursor:not-allowed; transform:none; box-shadow:none;}
+
+  /* ---------- quiz ---------- */
+  .chakra-tag{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--text-muted); margin-bottom:6px;
+  }
+  .chakra-tag .dot{width:9px;height:9px;border-radius:50%; background:var(--glow-color); box-shadow:0 0 8px 1px var(--glow-color);}
+  h2.section-title{
+    font-family:'Noto Serif SC',serif;
+    font-weight:600;
+    font-size:26px;
+    margin:0 0 26px;
+    color:var(--glow-color);
+  }
+  .q-block{ margin-bottom:26px; }
+  .q-text{ font-size:15.5px; line-height:1.7; margin-bottom:12px; color:var(--text-primary); }
+  .options{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+  .opt{
+    position:relative;
+  }
+  .opt input{ position:absolute; opacity:0; inset:0; cursor:pointer; margin:0; }
+  .opt label{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px;
+    padding:10px 4px;
+    border-radius:12px;
+    border:1px solid var(--card-border);
+    background:rgba(255,255,255,.03);
+    font-size:12px;
+    color:var(--text-muted);
+    cursor:pointer;
+    transition:all .2s ease;
+    line-height:1.3;
+    text-align:center;
+    height:100%;
+  }
+  .opt label b{ font-family:'Noto Serif SC',serif; font-size:17px; color:var(--text-primary); font-weight:600;}
+  .opt input:checked + label{
+    border-color:var(--glow-color);
+    background:color-mix(in srgb, var(--glow-color) 18%, transparent);
+    box-shadow:0 0 0 1px var(--glow-color) inset;
+  }
+  .opt input:checked + label b{ color:var(--glow-color); }
+  .opt input:focus-visible + label{ outline:2px solid var(--glow-color); outline-offset:2px; }
+
+  .nav-row{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:30px;
+  }
+  .progress-text{ font-size:12px; color:var(--text-muted); letter-spacing:.05em; }
+
+  /* ---------- results ---------- */
+  .result-hero{ text-align:center; margin-bottom:34px; }
+  .result-hero .eyebrow{ margin-bottom:14px; }
+  .dominant-name{
+    font-family:'Noto Serif SC',serif;
+    font-weight:700;
+    font-size:clamp(30px,6vw,46px);
+    margin:0 0 8px;
+    color:var(--glow-color);
+    text-shadow:0 0 30px var(--glow-color);
+  }
+  .dominant-desc{ color:var(--text-muted); font-size:14.5px; max-width:520px; margin:0 auto; line-height:1.85;}
+
+  .bars{ margin:34px 0; display:flex; flex-direction:column; gap:14px;}
+  .bar-row{ display:grid; grid-template-columns:88px 1fr 44px; align-items:center; gap:12px;}
+  .bar-label{ font-size:13px; color:var(--text-muted); text-align:right; }
+  .bar-track{ height:14px; border-radius:999px; background:rgba(255,255,255,.05); overflow:hidden; position:relative;}
+  .bar-fill{ height:100%; border-radius:999px; transition:width 1.1s cubic-bezier(.22,1,.36,1); box-shadow:0 0 10px 0 var(--glow-color); }
+  .bar-score{ font-size:13px; color:var(--text-primary); font-family:'Noto Serif SC',serif; }
+
+  .tip-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:14px; margin-top:12px;
+  }
+  .tip-card{
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--card-border);
+    border-left:3px solid var(--glow-color);
+    border-radius:14px;
+    padding:16px 18px;
+  }
+  .tip-card h3{
+    margin:0 0 6px; font-size:14px; font-family:'Noto Serif SC',serif; color:var(--glow-color);
+  }
+  .tip-card p{ margin:0; font-size:13px; color:var(--text-muted); line-height:1.7;}
+
+  .divider{ border:none; border-top:1px solid var(--card-border); margin:34px 0; }
+
+  .footer-actions{ display:flex; justify-content:center; margin-top:30px; }
+
+  .hidden{ display:none !important; }
+
+  @media (max-width:640px){
+    .app{ flex-direction:column; gap:0; padding-top:8px;}
+    .spine-wrap{
+      flex-direction:row;
+      position:static;
+      width:100%;
+      padding:6px 0 22px;
+      justify-content:center;
+      gap:14px;
+    }
+    .spine-line{
+      left:20px; right:20px; top:50%; bottom:auto; width:auto; height:2px;
+      background:linear-gradient(to right,
+        var(--c-root),var(--c-sacral),var(--c-solar),
+        var(--c-heart),var(--c-throat),var(--c-eye),var(--c-crown));
+      transform:none;
+    }
+    .options{ grid-template-columns:repeat(2,1fr); }
+    .bar-row{ grid-template-columns:64px 1fr 36px; }
+    .panel{ padding:26px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<header class="top">
+  <div class="eyebrow">CHAKRA COLOR ASSESSMENT</div>
+  <h1 class="title">七脉轮颜色自测</h1>
+</header>
+
+<div class="app">
+  <div class="spine-wrap" id="spineWrap">
+    <div class="spine-line"></div>
+    <!-- orbs injected by JS, root at bottom -->
+  </div>
+
+  <main>
+
+    <!-- INTRO -->
+    <section id="intro" class="panel">
+      <p class="lede">
+        七个脉轮各对应四道题，请凭第一感觉作答，无需过度思考。
+        全部答完后，将为你点亮专属的能量脊柱，并给出主导脉轮与疗愈建议。
+      </p>
+      <div class="scale-key">
+        <div><b>1</b>完全不符合</div>
+        <div><b>2</b>偶尔</div>
+        <div><b>3</b>经常</div>
+        <div><b>4</b>完全符合</div>
+      </div>
+      <button class="cta" onclick="startQuiz()">开始测试</button>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="panel hidden">
+      <div class="chakra-tag"><span class="dot" id="tagDot"></span><span id="tagLabel"></span></div>
+      <h2 class="section-title" id="sectionTitle"></h2>
+      <div id="questionsWrap"></div>
+      <div class="nav-row">
+        <button class="cta ghost" id="prevBtn" onclick="prevSection()">上一步</button>
+        <span class="progress-text" id="progressText"></span>
+        <button class="cta" id="nextBtn" onclick="nextSection()">下一步</button>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="results" class="panel hidden">
+      <div class="result-hero">
+        <div class="eyebrow">你的主导脉轮</div>
+        <div class="dominant-name" id="dominantName"></div>
+        <p class="dominant-desc" id="dominantDesc"></p>
+      </div>
+
+      <div class="bars" id="barsWrap"></div>
+
+      <hr class="divider">
+
+      <h3 style="font-family:'Noto Serif SC',serif; font-weight:600; font-size:17px; margin:0 0 4px;">疗愈建议</h3>
+      <p class="lede" style="margin-bottom:14px;">根据得分较低的脉轮，为你挑选了对应的滋养方法：</p>
+      <div class="tip-grid" id="tipsWrap"></div>
+
+      <div class="footer-actions">
+        <button class="cta ghost" onclick="restart()">重新测试</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const CHAKRAS = [
+  {
+    key:'root', name:'海底轮', color:'红色', hex:'var(--c-root)',
+    trait:'扎根务实，生命力强，擅长落地搞事业、稳定生活',
+    heal:'多穿红、赤脚踩草地、规律运动补海底轮',
+    questions:[
+      '我对生活、金钱、住所拥有稳定安全感',
+      '我很少焦虑生存压力，相信基础需求能被满足',
+      '我热爱大地、自然，能踏实感受身体存在感',
+      '我精力充沛，很少长期疲惫、体虚乏力'
+    ]
+  },
+  {
+    key:'sacral', name:'脐轮', color:'橙色', hex:'var(--c-sacral)',
+    trait:'感性浪漫，创造力旺盛，共情力极强',
+    heal:'跳舞、画画、享受美食释放情绪',
+    questions:[
+      '我愿意接纳、释放自己所有情绪，不压抑',
+      '我拥有稳定爱好、创作欲，容易感受生活乐趣',
+      '亲密关系里我放松自在，不羞耻自己的欲望',
+      '我适应变化，情绪流动顺畅，不长期内耗压抑'
+    ]
+  },
+  {
+    key:'solar', name:'太阳轮', color:'黄色', hex:'var(--c-solar)',
+    trait:'自信强大，主导型人格，目标感十足',
+    heal:'晒太阳、自我肯定、建立边界提升自信',
+    questions:[
+      '我认可自我价值，不需要靠他人认可证明自己',
+      '遇事敢做决定，懂得设立边界、拒绝不合理要求',
+      '我有行动力，能主动掌控人生，不被动妥协',
+      '很少自卑、容易暴怒，消化情绪能力强'
+    ]
+  },
+  {
+    key:'heart', name:'心轮', color:'绿色', hex:'var(--c-heart)',
+    trait:'温柔疗愈，天生爱人，擅长维系关系、治愈他人',
+    heal:'多去森林、养绿植、多包容自己',
+    questions:[
+      '我能温柔善待自己，也真心共情身边所有人',
+      '过往伤害容易放下，擅长原谅他人与自己',
+      '乐于付出爱，不害怕亲密，不会习惯性封闭内心',
+      '人际关系和谐，很少心生嫉妒、怨恨、隔阂'
+    ]
+  },
+  {
+    key:'throat', name:'喉轮', color:'蓝色', hex:'var(--c-throat)',
+    trait:'通透表达，坦诚纯粹，适合创作、沟通类工作',
+    heal:'多唱歌、写日记、坦诚说出心里话',
+    questions:[
+      '我敢于说出真实想法，不在意他人是否认同',
+      '擅长倾听，表达清晰，不会心口不一、刻意讨好',
+      '有灵感、表达欲，喜欢文字、歌唱、分享观点',
+      '很少喉咙干痛、失语、习惯性沉默压抑想法'
+    ]
+  },
+  {
+    key:'eye', name:'眉心轮', color:'靛蓝', hex:'var(--c-eye)',
+    trait:'灵性敏感，第六感超强，看透人心与规律',
+    heal:'睡前冥想、记录梦境、独处静心',
+    questions:[
+      '我相信直觉，第一判断往往准确可靠',
+      '经常记住清晰梦境，想象力丰富、擅长规划',
+      '能看透事物本质，不容易被表象迷惑',
+      '内心平静，很少长期焦虑、头脑混乱、偏头痛'
+    ]
+  },
+  {
+    key:'crown', name:'顶轮', color:'紫色', hex:'var(--c-crown)',
+    trait:'通透觉醒，精神内核强大，看淡得失格局开阔',
+    heal:'深夜冥想、水晶、放空放下执念',
+    questions:[
+      '时常感受到内心平和，有超脱世俗的通透感',
+      '愿意接纳多元观念，不固执、不狭隘偏激',
+      '偶尔有冥想、放空、探索精神世界的需求',
+      '遇事不钻牛角尖，容易放下执念、与世界和解'
+    ]
+  }
+];
+
+let current = 0;
+const answers = CHAKRAS.map(c => Array(c.questions.length).fill(null));
+
+const spineWrap = document.getElementById('spineWrap');
+CHAKRAS.forEach((c, i) => {
+  const orb = document.createElement('div');
+  orb.className = 'orb';
+  orb.id = 'orb-' + i;
+  orb.style.setProperty('--glow-color', c.hex);
+  spineWrap.appendChild(orb);
+});
+
+function updateSpine(){
+  CHAKRAS.forEach((c,i)=>{
+    const orb = document.getElementById('orb-'+i);
+    orb.classList.remove('active','done');
+    if(i < current) orb.classList.add('done');
+    else if(i === current) orb.classList.add('active');
+  });
+}
+
+function startQuiz(){
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  renderSection();
+}
+
+function renderSection(){
+  const c = CHAKRAS[current];
+  document.getElementById('tagDot').style.setProperty('--glow-color', c.hex);
+  document.getElementById('tagLabel').textContent = `脉轮 ${current+1} / 7`;
+  document.getElementById('sectionTitle').textContent = `${c.name}（${c.color}）`;
+  document.getElementById('sectionTitle').style.setProperty('--glow-color', c.hex);
+  document.getElementById('quiz').style.setProperty('--glow-color', c.hex);
+
+  const wrap = document.getElementById('questionsWrap');
+  wrap.innerHTML = '';
+  c.questions.forEach((q, qi) => {
+    const block = document.createElement('div');
+    block.className = 'q-block';
+    const labels = ['完全不符合','偶尔','经常','完全符合'];
+    let optsHtml = '';
+    for(let v=1; v<=4; v++){
+      const checked = answers[current][qi] === v ? 'checked' : '';
+      optsHtml += `
+        <div class="opt">
+          <input type="radio" name="q${current}-${qi}" id="q${current}-${qi}-${v}" value="${v}" ${checked}
+            onchange="setAnswer(${qi}, ${v})">
+          <label for="q${current}-${qi}-${v}"><b>${v}</b>${labels[v-1]}</label>
+        </div>`;
+    }
+    block.innerHTML = `<div class="q-text">${qi+1}. ${q}</div><div class="options">${optsHtml}</div>`;
+    wrap.appendChild(block);
+  });
+
+  document.getElementById('prevBtn').style.visibility = current === 0 ? 'hidden' : 'visible';
+  document.getElementById('nextBtn').textContent = current === CHAKRAS.length - 1 ? '查看结果' : '下一步';
+  document.getElementById('progressText').textContent = `已完成 ${current} / ${CHAKRAS.length} 个脉轮`;
+  updateNextState();
+  updateSpine();
+}
+
+function setAnswer(qi, v){
+  answers[current][qi] = v;
+  updateNextState();
+}
+
+function updateNextState(){
+  const done = answers[current].every(v => v !== null);
+  document.getElementById('nextBtn').disabled = !done;
+}
+
+function nextSection(){
+  if(!answers[current].every(v => v !== null)) return;
+  if(current < CHAKRAS.length - 1){
+    current++;
+    renderSection();
+    document.getElementById('quiz').scrollIntoView({behavior:'smooth', block:'start'});
+  } else {
+    showResults();
+  }
+}
+
+function prevSection(){
+  if(current > 0){
+    current--;
+    renderSection();
+  }
+}
+
+function scoreOf(i){
+  return answers[i].reduce((a,b) => a + b, 0);
+}
+
+function statusOf(score){
+  if(score >= 13) return '能量通畅';
+  if(score >= 7) return '平衡中等';
+  return '脉轮堵塞';
+}
+
+function showResults(){
+  document.getElementById('quiz').classList.add('hidden');
+  const results = document.getElementById('results');
+  results.classList.remove('hidden');
+
+  const scores = CHAKRAS.map((c,i) => ({...c, score: scoreOf(i)}));
+  const dominant = scores.reduce((a,b) => b.score > a.score ? b : a);
+  const weakest = [...scores].sort((a,b) => a.score - b.score);
+
+  results.style.setProperty('--glow-color', dominant.hex);
+  document.getElementById('dominantName').textContent = `${dominant.name} · ${dominant.color}`;
+  document.getElementById('dominantName').style.color = null;
+  document.getElementById('dominantDesc').textContent =
+    `总分 ${dominant.score} / 16 —— ${dominant.trait}。`;
+
+  const barsWrap = document.getElementById('barsWrap');
+  barsWrap.innerHTML = '';
+  scores.forEach(c => {
+    const pct = Math.round(c.score / 16 * 100);
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.style.setProperty('--glow-color', c.hex);
+    row.innerHTML = `
+      <div class="bar-label">${c.name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%; background:${c.hex};" data-pct="${pct}"></div></div>
+      <div class="bar-score">${c.score}</div>
+    `;
+    barsWrap.appendChild(row);
+  });
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      document.querySelectorAll('.bar-fill').forEach(el=>{
+        el.style.width = el.dataset.pct + '%';
+      });
+    }, 60);
+  });
+
+  const tipsWrap = document.getElementById('tipsWrap');
+  tipsWrap.innerHTML = '';
+  const lowest = weakest.slice(0,3);
+  lowest.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'tip-card';
+    card.style.setProperty('--glow-color', c.hex);
+    card.innerHTML = `<h3>${c.name}（${c.score}分 · ${statusOf(c.score)}）</h3><p>${c.heal}</p>`;
+    tipsWrap.appendChild(card);
+  });
+
+  current = CHAKRAS.length;
+  updateSpine();
+  CHAKRAS.forEach((c,i)=>{
+    const orb = document.getElementById('orb-'+i);
+    const scale = 0.7 + (scores[i].score/16) * 0.9;
+    orb.classList.add('done');
+    orb.style.width = (22*scale) + 'px';
+    orb.style.height = (22*scale) + 'px';
+  });
+
+  results.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function restart(){
+  current = 0;
+  CHAKRAS.forEach((c,i) => answers[i].fill(null));
+  document.getElementById('results').classList.add('hidden');
+  document.getElementById('intro').classList.remove('hidden');
+  CHAKRAS.forEach((c,i)=>{
+    const orb = document.getElementById('orb-'+i);
+    orb.style.width = '22px';
+    orb.style.height = '22px';
+    orb.classList.remove('done','active');
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+updateSpine();
+</script>
+
+</body>
+</html>

@@ -1,661 +1,641 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>我踏马莱纳！</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#FFE9F0">
+<title>💌 一封特别的邀请</title>
 <style>
-  :root {
-    --pink-bg: #ffe1ec;
-    --pink-card: #fff5f8;
-    --pink-deep: #ff5c8a;
-    --pink-deep2: #e8487a;
-    --text-dark: #4a2b35;
-    --heart-color: #ff8fab;
+  :root{
+    --ink:#1C1C2E; --sub:#8E8E93; --accent:#FF4D79; --accent2:#FF6B95;
+    --card:#FFFFFF; --tint:#FFF0F5; --radius:22px;
+    --spring:cubic-bezier(.32,.72,0,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","SF Pro","PingFang SC","Helvetica Neue",sans-serif;
+    color:var(--ink);
+    background:linear-gradient(160deg,#FFE9F0,#FFE0EA 45%,#EFE4FF);
+    background-size:200% 200%;
+    animation:bgShift 14s ease-in-out infinite alternate;
+    overflow:hidden; touch-action:manipulation;
+    -webkit-font-smoothing:antialiased;
+  }
+  @keyframes bgShift{from{background-position:0% 0%}to{background-position:100% 100%}}
+
+  /* ---------- floating hearts backdrop ---------- */
+  .float-heart{position:fixed;bottom:-8vh;font-size:22px;opacity:0;pointer-events:none;z-index:0;
+    animation:floatUp linear infinite}
+  @keyframes floatUp{
+    0%{transform:translateY(0) rotate(0);opacity:0}
+    12%{opacity:.35}
+    88%{opacity:.25}
+    100%{transform:translateY(-115vh) rotate(38deg);opacity:0}
   }
 
-  * { box-sizing: border-box; }
+  /* ---------- screens ---------- */
+  .stage{position:fixed;inset:0;display:flex;justify-content:center;z-index:1}
+  .screen{
+    position:absolute;inset:0;margin:0 auto;max-width:430px;width:100%;
+    padding:max(20px,env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom));
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    opacity:0;transform:translateX(48px);pointer-events:none;
+    transition:opacity .5s var(--spring),transform .5s var(--spring);
+    overflow-y:auto;
+  }
+  .screen.active{opacity:1;transform:none;pointer-events:auto}
+  .screen.exit{opacity:0;transform:translateX(-48px)}
 
-  body {
-    margin: 0;
-    font-family: "Comic Sans MS", "Chalkboard SE", "Segoe UI", sans-serif;
-    background: var(--pink-bg);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-  }
+  /* ---------- shared type ---------- */
+  .kicker{font-size:14px;font-weight:600;color:var(--accent);letter-spacing:.14em}
+  h1{font-size:26px;font-weight:800;text-align:center;line-height:1.35}
+  .sub{font-size:15px;color:var(--sub);text-align:center;line-height:1.6}
 
-  /* floating hearts background */
-  .hearts {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .heart {
-    position: absolute;
-    bottom: -10%;
-    font-size: 24px;
-    opacity: 0.6;
-    animation: floatUp linear infinite;
-    color: var(--heart-color);
-  }
-  @keyframes floatUp {
-    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
-    10%  { opacity: 0.7; }
-    90%  { opacity: 0.7; }
-    100% { transform: translateY(-110vh) translateX(var(--drift, 20px)) rotate(360deg); opacity: 0; }
-  }
+  /* ---------- progress ---------- */
+  .progress{display:flex;gap:7px;margin-bottom:2px}
+  .progress i{width:7px;height:7px;border-radius:50%;background:#E3C9D4;transition:all .4s var(--spring)}
+  .progress i.on{background:var(--accent);width:22px;border-radius:5px}
 
-  .stage {
-    position: relative;
-    z-index: 1;
-    width: 92%;
-    max-width: 380px;
+  /* ---------- buttons ---------- */
+  .btn{
+    appearance:none;border:0;cursor:pointer;font-family:inherit;
+    background:linear-gradient(135deg,var(--accent2),var(--accent));
+    color:#fff;font-size:17px;font-weight:700;
+    padding:16px 42px;border-radius:999px;
+    box-shadow:0 8px 22px rgba(255,77,121,.35);
+    transition:transform .25s var(--spring),box-shadow .25s,opacity .25s;
   }
+  .btn:active{transform:scale(.94)}
+  .btn[disabled]{opacity:.35;box-shadow:none;pointer-events:none}
+  .btn.ghost{background:#fff;color:var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.07)}
+  .back{
+    position:absolute;top:max(16px,env(safe-area-inset-top));left:18px;
+    width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.75);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    color:var(--ink);font-size:19px;font-weight:700;cursor:pointer;
+    box-shadow:0 3px 10px rgba(0,0,0,.06);transition:transform .2s;
+  }
+  .back:active{transform:scale(.88)}
 
-  .card {
-    background: var(--pink-card);
-    border: 3px solid var(--pink-deep);
-    border-radius: 28px;
-    padding: 28px 22px;
-    text-align: center;
-    box-shadow: 0 12px 30px rgba(255, 92, 138, 0.25);
-    animation: pop 0.4s ease;
+  /* ---------- option cards ---------- */
+  .opts{display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px}
+  .opt{
+    display:flex;align-items:center;gap:14px;width:100%;
+    background:var(--card);border:2.5px solid transparent;border-radius:var(--radius);
+    padding:14px 16px;cursor:pointer;text-align:left;font-family:inherit;
+    box-shadow:0 6px 18px rgba(180,120,150,.12);
+    transition:transform .3s var(--spring),border-color .25s,background .25s;
+    position:relative;
   }
+  .opt:active{transform:scale(.965)}
+  .opt .ico{
+    width:46px;height:46px;flex:0 0 46px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:24px;
+    transition:transform .35s var(--spring);
+  }
+  .opt .txt{font-size:16px;font-weight:600;line-height:1.4;flex:1}
+  .opt .check{
+    width:24px;height:24px;flex:0 0 24px;border-radius:50%;
+    border:2px solid #E5D3DC;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:13px;font-weight:800;transition:all .3s var(--spring);
+  }
+  .opt.on{border-color:var(--accent);background:var(--tint)}
+  .opt.on .ico{transform:scale(1.12) rotate(-6deg)}
+  .opt.on .check{background:var(--accent);border-color:var(--accent)}
+  .opt.pulse{animation:pulse .5s var(--spring)}
+  @keyframes pulse{40%{transform:scale(1.05)}}
 
-  @keyframes pop {
-    from { transform: scale(0.85); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
+  /* ---------- envelope ---------- */
+  #s-envelope{gap:30px}
+  .env-wrap{position:relative;width:290px;height:200px;cursor:pointer;
+    filter:drop-shadow(0 18px 30px rgba(200,90,130,.3));
+    animation:bob 3s ease-in-out infinite;
   }
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+  .env-back{position:absolute;inset:0;background:linear-gradient(180deg,#FF97B4,#FF6E95);border-radius:14px}
+  .env-letter{
+    position:absolute;left:14px;right:14px;top:12px;bottom:12px;
+    background:#FFFDF9;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-size:40px;transition:transform .9s var(--spring) .55s;z-index:2;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+  }
+  .env-front{position:absolute;inset:0;z-index:3;border-radius:14px;
+    background:linear-gradient(180deg,#FF7FA3,#FF5C88);
+    clip-path:polygon(0 0,50% 48%,100% 0,100% 100%,0 100%);
+  }
+  .env-flap{position:absolute;inset:0;z-index:4;border-radius:14px 14px 0 0;
+    background:linear-gradient(180deg,#FF6E97,#FF4D79);
+    clip-path:polygon(0 0,100% 0,50% 52%);
+    transform-origin:top center;transition:transform .7s var(--spring);
+    backface-visibility:hidden;
+  }
+  .env-seal{position:absolute;left:50%;top:44%;z-index:5;transform:translate(-50%,-50%);
+    width:52px;height:52px;border-radius:50%;background:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .4s,transform .4s;
+  }
+  .env-wrap.open{animation:none}
+  .env-wrap.open .env-flap{transform:rotateX(178deg)}
+  .env-wrap.open .env-seal{opacity:0;transform:translate(-50%,-50%) scale(.4)}
+  .env-wrap.open .env-letter{transform:translateY(-96px) scale(1.06)}
+  .tap-hint{font-size:15px;color:var(--sub);font-weight:600;animation:blink 1.6s ease-in-out infinite}
+  @keyframes blink{50%{opacity:.35}}
 
-  .avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin: 0 auto 14px;
-    display: block;
-    border: 4px solid var(--pink-deep);
-    background: #cdebc5;
+  /* ---------- ask (yes/no) ---------- */
+  .letter-card{
+    width:100%;max-width:360px;background:var(--card);border-radius:26px;
+    padding:34px 26px;box-shadow:0 14px 40px rgba(190,100,140,.22);
+    text-align:center;position:relative;
   }
-
-  h1 {
-    font-size: 22px;
-    color: var(--text-dark);
-    margin: 6px 0 18px;
-    line-height: 1.4;
-  }
-
-  .btn-row {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    min-height: 56px;
-    align-items: center;
-  }
-
-  button {
-    font-family: inherit;
-    font-size: 17px;
-    font-weight: bold;
-    padding: 14px 38px;
-    border-radius: 30px;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-
-  .yes-btn {
-    background: linear-gradient(135deg, var(--pink-deep), var(--pink-deep2));
-    color: #fff;
-    box-shadow: 0 6px 16px rgba(232, 72, 122, 0.4);
-  }
-  .yes-btn:hover {
-    transform: scale(1.06);
-    box-shadow: 0 8px 20px rgba(232, 72, 122, 0.55);
-  }
-
-  .no-btn {
-    background: #ffd2e0;
-    color: var(--pink-deep2);
-    position: absolute;
-  }
-
-  .subtitle {
-    margin-top: 14px;
-    font-size: 13px;
-    color: #c97a92;
-  }
-
-  /* ===== Step screens ===== */
-  .screen { display: none; }
-  .screen.active { display: block; }
-
-  /* Calendar */
-  .cal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    color: var(--text-dark);
-    font-weight: bold;
-    font-size: 17px;
-  }
-  .cal-header button {
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: var(--pink-deep2);
-    padding: 4px 10px;
-    cursor: pointer;
-  }
-  .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-    margin-bottom: 16px;
-  }
-  .cal-grid .dow {
-    font-size: 12px;
-    font-weight: bold;
-    color: #c97a92;
-    text-align: center;
-  }
-  .cal-day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 14px;
-    color: var(--text-dark);
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-  .cal-day:hover { background: #ffd2e0; }
-  .cal-day.selected {
-    background: var(--pink-deep);
-    color: #fff;
-    font-weight: bold;
-  }
-  .cal-day.empty { cursor: default; }
-  .cal-day.empty:hover { background: none; }
-
-  /* Time picker */
-  .time-picker {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    margin: 14px 0 20px;
-  }
-  .time-col {
-    height: 140px;
-    overflow-y: scroll;
-    scroll-snap-type: y mandatory;
-    width: 64px;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .time-col::-webkit-scrollbar { display: none; }
-  .time-col .pad {
-    height: 50px;
-  }
-  .time-col .opt {
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    scroll-snap-align: center;
-    font-size: 18px;
-    color: #d7a7b8;
-  }
-  .time-col .opt.active {
-    color: var(--pink-deep2);
-    font-weight: bold;
-    font-size: 22px;
-  }
-  .time-picker-wrap {
-    position: relative;
-  }
-  .time-picker-wrap::before,
-  .time-picker-wrap::after {
-    content: "";
-    position: absolute;
-    left: 0; right: 0;
-    height: 50px;
-    pointer-events: none;
-    z-index: 2;
-  }
-  .time-picker-wrap::before {
-    top: 0;
-    background: linear-gradient(to bottom, var(--pink-card), transparent);
-  }
-  .time-picker-wrap::after {
-    bottom: 20px;
-    background: linear-gradient(to top, var(--pink-card), transparent);
-  }
-  .time-highlight {
-    position: absolute;
-    left: 0; right: 0;
-    top: 50px;
-    height: 40px;
-    background: #ffe7ee;
-    border-radius: 10px;
-    z-index: 0;
-    pointer-events: none;
-  }
-  .time-picker {
-    position: relative;
-    z-index: 1;
+  .letter-card::before{content:"";position:absolute;inset:10px;border:1.5px dashed #FFD3E0;border-radius:18px;pointer-events:none}
+  .letter-emoji{font-size:46px;display:inline-block;animation:beat 1.4s ease-in-out infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}12%{transform:scale(1.18)}24%{transform:scale(1)}}
+  .ask-btns{display:flex;gap:16px;justify-content:center;margin-top:26px;position:relative}
+  #btn-yes{transition:transform .35s var(--spring),box-shadow .3s}
+  #btn-no{
+    background:#F1F1F4;color:#6B6B70;box-shadow:none;
+    transition:left .3s var(--spring),top .3s var(--spring),transform .3s;
+    white-space:nowrap;
   }
 
-  /* Vibe picker */
-  .vibe-sub {
-    font-size: 13px;
-    color: #c97a92;
-    margin: -10px 0 16px;
+  /* ---------- bead heart (拼豆) ---------- */
+  .bead-board{
+    background:#fff;border-radius:24px;padding:22px;
+    box-shadow:0 12px 34px rgba(190,100,140,.2);
+    display:grid;grid-template-columns:repeat(9,22px);gap:5px;
   }
-  .vibe-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 18px;
+  .bead{width:22px;height:22px;border-radius:50%;position:relative;
+    transform:scale(0);animation:pop .45s var(--spring) forwards;
   }
-  .vibe-item {
-    background: #fff;
-    border: 2px solid #ffd2e0;
-    border-radius: 14px;
-    padding: 14px 6px;
-    font-size: 30px;
-    cursor: pointer;
-    transition: transform 0.15s ease, border-color 0.15s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
+  .bead::after{content:"";position:absolute;inset:35%;border-radius:50%;background:rgba(255,255,255,.55)}
+  .bead.empty{visibility:hidden;animation:none}
+  @keyframes pop{to{transform:scale(1)}}
+
+  /* ---------- name input ---------- */
+  .field{
+    width:100%;max-width:360px;background:#fff;border-radius:18px;
+    border:2.5px solid transparent;padding:16px 18px;font-size:17px;font-weight:600;
+    font-family:inherit;color:var(--ink);text-align:center;outline:none;
+    box-shadow:0 6px 18px rgba(180,120,150,.12);transition:border-color .25s;
   }
-  .vibe-item .label {
-    font-size: 11px;
-    color: var(--text-dark);
-    font-weight: bold;
+  .field:focus{border-color:var(--accent)}
+  .field::placeholder{color:#C9B4BE;font-weight:500}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:360px}
+  .chip-s{
+    border:0;background:rgba(255,255,255,.8);border-radius:999px;padding:8px 14px;
+    font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;font-family:inherit;
+    box-shadow:0 3px 8px rgba(0,0,0,.05);transition:transform .2s;
   }
-  .vibe-item:hover { transform: translateY(-2px); }
-  .vibe-item.selected {
-    border-color: var(--pink-deep);
-    background: #fff0f4;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(232,72,122,0.25);
+  .chip-s:active{transform:scale(.92)}
+
+  /* ---------- time ---------- */
+  .time-big{font-size:52px;font-weight:800;letter-spacing:.03em;font-variant-numeric:tabular-nums}
+  .time-big small{font-size:18px;color:var(--sub);font-weight:600;display:block;letter-spacing:0}
+  .time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:360px}
+  .tchip{
+    border:2.5px solid transparent;background:#fff;border-radius:16px;padding:13px 0;
+    font-size:16px;font-weight:700;font-family:inherit;color:var(--ink);cursor:pointer;
+    box-shadow:0 4px 12px rgba(180,120,150,.1);transition:all .25s var(--spring);
+  }
+  .tchip:active{transform:scale(.93)}
+  .tchip.on{border-color:var(--accent);background:var(--tint);color:var(--accent)}
+  .custom-time{display:flex;align-items:center;gap:10px;margin-top:2px}
+  .custom-time label{font-size:14px;color:var(--sub);font-weight:600}
+  .custom-time input{
+    border:0;background:#fff;border-radius:12px;padding:9px 12px;font-family:inherit;
+    font-size:16px;font-weight:700;color:var(--accent);box-shadow:0 3px 10px rgba(0,0,0,.06);
   }
 
-  .confirm-btn {
-    width: 100%;
-    background: #e8c2cf;
-    color: #fff;
-    font-size: 16px;
-    padding: 14px;
-    border-radius: 30px;
-    cursor: not-allowed;
-    transition: background 0.2s ease, box-shadow 0.2s ease;
+  /* ---------- summary ticket ---------- */
+  .ticket{
+    width:100%;max-width:370px;background:#fff;border-radius:26px;overflow:hidden;
+    box-shadow:0 16px 44px rgba(190,100,140,.28);position:relative;
+    animation:rise .7s var(--spring);
   }
-  .confirm-btn.ready {
-    background: linear-gradient(135deg, var(--pink-deep), var(--pink-deep2));
-    cursor: pointer;
-    box-shadow: 0 6px 16px rgba(232, 72, 122, 0.4);
+  @keyframes rise{from{opacity:0;transform:translateY(36px) scale(.96)}}
+  .ticket-top{background:linear-gradient(135deg,var(--accent2),var(--accent));padding:26px 24px 20px;color:#fff;text-align:center}
+  .ticket-top .t-emoji{font-size:38px}
+  .ticket-top h2{font-size:22px;font-weight:800;margin-top:6px;word-break:break-all}
+  .ticket-top p{font-size:12.5px;opacity:.85;letter-spacing:.28em;margin-top:6px}
+  .ticket-body{padding:20px 24px 8px}
+  .trow{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid #F6EBF0}
+  .trow:last-child{border-bottom:0}
+  .trow .t-ico{font-size:20px;width:28px;text-align:center;flex:0 0 28px}
+  .trow .t-label{font-size:12px;color:var(--sub);font-weight:600;margin-bottom:3px}
+  .trow .t-val{font-size:15.5px;font-weight:700;line-height:1.45}
+  .ticket-cut{position:relative;border-top:2px dashed #F0DCE4;margin:8px 0 0}
+  .ticket-cut::before,.ticket-cut::after{content:"";position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:#FFE7EF}
+  .ticket-cut::before{left:-11px}.ticket-cut::after{right:-11px}
+  .ticket-foot{padding:16px 24px 22px;text-align:center;font-size:12.5px;color:var(--sub);line-height:1.7}
+  .stamp{
+    position:absolute;right:16px;top:112px;transform:rotate(14deg);
+    border:2.5px solid rgba(255,255,255,.9);color:#fff;border-radius:10px;
+    font-size:12px;font-weight:800;padding:5px 9px;letter-spacing:.12em;
+    animation:stampIn .5s var(--spring) .9s both;
   }
-  .confirm-btn.ready:hover { transform: scale(1.03); }
+  @keyframes stampIn{from{opacity:0;transform:rotate(14deg) scale(2.2)}}
 
-  /* Final screen */
-  .final-emoji { font-size: 64px; margin-bottom: 8px; }
-  .final-detail {
-    background: #fff;
-    border-radius: 14px;
-    padding: 14px;
-    margin: 16px 0;
-    text-align: left;
-    font-size: 14px;
-    color: var(--text-dark);
-    line-height: 1.7;
-  }
-  .final-detail b { color: var(--pink-deep2); }
-  .restart {
-    background: none;
-    border: none;
-    color: var(--pink-deep2);
-    text-decoration: underline;
-    font-size: 13px;
-    margin-top: 10px;
-    cursor: pointer;
+  /* ---------- confetti & burst ---------- */
+  .confetti{position:fixed;top:-24px;z-index:60;border-radius:3px;pointer-events:none;
+    animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(112vh) rotate(760deg)}}
+  .burst{position:fixed;z-index:60;font-size:20px;pointer-events:none;
+    animation:burst .9s var(--spring) forwards}
+  @keyframes burst{to{transform:translate(var(--tx),var(--ty)) scale(.4);opacity:0}}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.15s !important}
   }
 </style>
 </head>
 <body>
+<div class="stage" id="stage">
 
-<div class="hearts" id="hearts"></div>
-
-<div class="stage">
-
-  <!-- Step 1: Ask -->
-  <div class="screen active" id="screen-ask">
-    <div class="card">
-      <div class="avatar" id="avatar-emoji" style="display:flex;align-items:center;justify-content:center;font-size:64px;">🐷</div>
-      <h1>直视我，猪妞！<br><span style="font-size:16px; opacity:0.8;">Will you go on a date with me? 🥺</span></h1>
-      <div class="btn-row" id="btnRow">
-        <button class="no-btn" id="noBtn">No</button>
-        <button class="yes-btn" id="yesBtn">Yes</button>
-      </div>
-      <div class="subtitle">galgame里面就是这样的！！ 💕</div>
+  <!-- 0 · envelope -->
+  <section class="screen active" id="s-envelope">
+    <div class="kicker">TO: 特别的你</div>
+    <div class="env-wrap" id="envelope" role="button" aria-label="拆开信封">
+      <div class="env-back"></div>
+      <div class="env-letter">💌</div>
+      <div class="env-front"></div>
+      <div class="env-flap"></div>
+      <div class="env-seal">❤️</div>
     </div>
-  </div>
+    <div class="tap-hint">👆 点一下，拆开信封</div>
+  </section>
 
-  <!-- Step 2: Pick a date -->
-  <div class="screen" id="screen-date">
-    <div class="card">
-      <div class="cal-header">
-        <button id="prevMonth">‹</button>
-        <span id="monthLabel"></span>
-        <button id="nextMonth">›</button>
+  <!-- 1 · yes / no -->
+  <section class="screen" id="s-ask">
+    <div class="letter-card">
+      <span class="letter-emoji">💘</span>
+      <h1 style="margin-top:10px">我有一个蓄谋已久的计划</h1>
+      <p class="sub" style="margin-top:10px">你愿意接受我的约会邀请吗？</p>
+      <div class="ask-btns">
+        <button class="btn" id="btn-yes">是！</button>
+        <button class="btn" id="btn-no">不是</button>
       </div>
-      <div class="cal-grid" id="calGrid"></div>
-      <button class="confirm-btn" id="dateConfirm">选好日子啦 ✓</button>
     </div>
-  </div>
+  </section>
 
-  <!-- Step 3: Pick a time -->
-  <div class="screen" id="screen-time">
-    <div class="card">
-      <h1 style="font-size:18px;">几点见面比较好呢？<br><span style="font-size:14px; opacity:0.8;">Pick a time</span></h1>
-      <div class="time-picker-wrap">
-        <div class="time-highlight"></div>
-        <div class="time-picker">
-          <div class="time-col" id="hourCol"></div>
-          <div class="time-col" id="minCol"></div>
-          <div class="time-col" id="ampmCol"></div>
-        </div>
-      </div>
-      <button class="confirm-btn ready" id="timeConfirm">就这个时间 ✓</button>
+  <!-- 2 · 见面仪式 -->
+  <section class="screen" id="s-ritual">
+    <button class="back" data-back aria-label="返回">‹</button>
+    <div class="progress" data-prog></div>
+    <div class="kicker">STEP 1</div>
+    <h1>我们的见面仪式</h1>
+    <p class="sub">见面第一件事，走个什么流程？</p>
+    <div class="opts" data-group="ritual">
+      <button class="opt" data-val="兄弟抱一下" data-ico="🫂"><span class="ico" style="background:#FFE8D6">🫂</span><span class="txt">兄弟抱一下</span><span class="check">✓</span></button>
+      <button class="opt" data-val="握握手，握握双手" data-ico="🤝"><span class="ico" style="background:#D9F0FF">🤝</span><span class="txt">握握手，握握双手</span><span class="check">✓</span></button>
+      <button class="opt" data-val="让我摸摸头" data-ico="🫳"><span class="ico" style="background:#E3FBE3">🫳</span><span class="txt">让我摸摸头</span><span class="check">✓</span></button>
+      <button class="opt" data-val="全都要" data-ico="🤗" data-all><span class="ico" style="background:#FFE0EF">🤗</span><span class="txt">全都要！</span><span class="check">✓</span></button>
     </div>
-  </div>
+    <button class="btn" data-next disabled>下一步</button>
+  </section>
 
-  <!-- Step 4: Pick vibe -->
-  <div class="screen" id="screen-vibe">
-    <div class="card">
-      <h1 style="font-size:18px;">what's your vibe? 🌷</h1>
-      <div class="vibe-sub">选一个我们的理想活动 / Pick our ideal activity</div>
-      <div class="vibe-grid" id="vibeGrid">
-        <div class="vibe-item" data-vibe="开始我们的galgame">🎮<span class="label">开始我们的galgame</span></div>
-        <div class="vibe-item" data-vibe="依旧练琴">🎸<span class="label">依旧练琴</span></div>
-        <div class="vibe-item" data-vibe="整点小电影">🎬<span class="label">整点小电影</span></div>
-        <div class="vibe-item" data-vibe="诶，云朵？">☁<span class="label">诶，云朵？</span></div>
-        <div class="vibe-item" data-vibe="排练！！">🎤<span class="label">排练！！</span></div>
-        <div class="vibe-item" data-vibe="yuzusoft，启动！">Ciallo~<span class="label">yuzusoft，启动！</span></div>
-      </div>
-      <button class="confirm-btn" id="vibeConfirm">Pick one first</button>
+  <!-- 3 · 首先去做什么 -->
+  <section class="screen" id="s-first">
+    <button class="back" data-back aria-label="返回">‹</button>
+    <div class="progress" data-prog></div>
+    <div class="kicker">STEP 2 · 可以多选哦</div>
+    <h1>首先去做什么呢</h1>
+    <p class="sub">热身环节，想做的全都勾上</p>
+    <div class="opts" data-group="first" data-multi>
+      <button class="opt" data-val="拯救我的头发，求你了" data-ico="💇"><span class="ico" style="background:#E4EBFF">💇</span><span class="txt">拯救我的头发，求你了</span><span class="check">✓</span></button>
+      <button class="opt" data-val="霸王茶姬" data-ico="🧋"><span class="ico" style="background:#FFE3E3">🧋</span><span class="txt">霸王茶姬</span><span class="check">✓</span></button>
+      <button class="opt" data-val="先来一场酣畅淋漓的掰手腕" data-ico="💪"><span class="ico" style="background:#FFF3D1">💪</span><span class="txt">先来一场酣畅淋漓的掰手腕</span><span class="check">✓</span></button>
+      <button class="opt" data-val="不知道，点根烟先" data-ico="🚬"><span class="ico" style="background:#EEEEF0">🚬</span><span class="txt">不知道，点根烟先</span><span class="check">✓</span></button>
     </div>
-  </div>
+    <button class="btn" data-next disabled>下一步</button>
+  </section>
 
-  <!-- Step 5: Final -->
-  <div class="screen" id="screen-final">
-    <div class="card">
-      <div class="final-emoji">🎉💌</div>
-      <h1 style="font-size:20px;">约会安排好啦！<br><span style="font-size:14px; opacity:0.8;">It's a date!</span></h1>
-      <div class="final-detail">
-        📅 <b>日期 Date:</b> <span id="finalDate"></span><br>
-        ⏰ <b>时间 Time:</b> <span id="finalTime"></span><br>
-        💖 <b>活动 Activity:</b> <span id="finalVibe"></span>
-      </div>
-      <div class="subtitle">期待和你见面啦～ 💕</div>
-      <button class="restart" id="restartBtn">重新选择 / Restart</button>
+  <!-- 4 · 主线任务 -->
+  <section class="screen" id="s-main">
+    <button class="back" data-back aria-label="返回">‹</button>
+    <div class="progress" data-prog></div>
+    <div class="kicker">STEP 3 · 主线任务</div>
+    <h1>开始我们的主要任务吧！</h1>
+    <div class="bead-board" id="beads" aria-label="拼豆爱心"></div>
+    <h1 style="font-size:22px">一起去拼豆！🧑‍🎨</h1>
+    <p class="sub">拼一个只属于我们的小心心</p>
+    <button class="btn" data-next>好耶，开拼！</button>
+  </section>
+
+  <!-- 5 · 晚餐 -->
+  <section class="screen" id="s-dinner">
+    <button class="back" data-back aria-label="返回">‹</button>
+    <div class="progress" data-prog></div>
+    <div class="kicker">STEP 4</div>
+    <h1>思考下今晚吃什么吧</h1>
+    <p class="sub">干饭是头等大事 🍚</p>
+    <div class="opts" data-group="dinner">
+      <button class="opt" data-val="SUSHIRO" data-ico="🍣"><span class="ico" style="background:#FFE9E0">🍣</span><span class="txt">SUSHIRO</span><span class="check">✓</span></button>
+      <button class="opt" data-val="海鲜！" data-ico="🦞"><span class="ico" style="background:#FFE0DB">🦞</span><span class="txt">海鲜！</span><span class="check">✓</span></button>
+      <button class="opt" data-val="麦当劳？！" data-ico="🍟"><span class="ico" style="background:#FFF4CE">🍟</span><span class="txt">麦当劳？！</span><span class="check">✓</span></button>
+      <button class="opt" data-val="鸡爪羊肉，海鲜只是顺便！" data-ico="🍖"><span class="ico" style="background:#F0E4D7">🍖</span><span class="txt">鸡爪羊肉，海鲜只是顺便！</span><span class="check">✓</span></button>
     </div>
-  </div>
+    <button class="btn" data-next disabled>下一步</button>
+  </section>
+
+  <!-- 6 · 取名 -->
+  <section class="screen" id="s-name">
+    <button class="back" data-back aria-label="返回">‹</button>
+    <div class="progress" data-prog></div>
+    <div class="kicker">STEP 5</div>
+    <h1>为我们这次的行程取个名字吧</h1>
+    <p class="sub">随便写，霸气一点也行 ✍️</p>
+    <input class="field" id="trip-name" maxlength="20" placeholder="例如：快乐星球一日游">
+    <div class="chips">
+      <button class="chip-s" data-fill="拼豆特工队出动日">拼豆特工队出动日</button>
+      <button class="chip-s" data-fill="快乐星球一日游">快乐星球一日游</button>
+      <button class="chip-s" data-fill="蓄谋已久计划 Vol.1">蓄谋已久计划 Vol.1</button>
+    </div>
+    <button class="btn" data-next disabled>下一步</button>
+  </section>
+
+  <!-- 7 · 时间 -->
+  <section class="screen" id="s-time">
+    <button class="back" data-back aria-label="返回">‹</button>
+    <div class="progress" data-prog></div>
+    <div class="kicker">STEP 6</div>
+    <h1>几点见面好呢</h1>
+    <div class="time-big" id="time-big">--:--<small>等你选一个时间</small></div>
+    <div class="time-grid" id="time-grid"></div>
+    <div class="custom-time">
+      <label for="time-custom">或者自定义：</label>
+      <input type="time" id="time-custom">
+    </div>
+    <button class="btn" data-next disabled>生成我们的行程单 🎫</button>
+  </section>
+
+  <!-- 8 · 总结 -->
+  <section class="screen" id="s-final">
+    <div class="ticket">
+      <div class="ticket-top">
+        <div class="t-emoji">🎫</div>
+        <h2 id="sum-name">—</h2>
+        <p>约 会 行 程 单</p>
+        <div class="stamp">已确认 ❤</div>
+      </div>
+      <div class="ticket-body">
+        <div class="trow"><span class="t-ico">🕐</span><div><div class="t-label">见面时间</div><div class="t-val" id="sum-time">—</div></div></div>
+        <div class="trow"><span class="t-ico" id="sum-ritual-ico">🫶</span><div><div class="t-label">见面仪式</div><div class="t-val" id="sum-ritual">—</div></div></div>
+        <div class="trow"><span class="t-ico">🎯</span><div><div class="t-label">热身环节</div><div class="t-val" id="sum-first">—</div></div></div>
+        <div class="trow"><span class="t-ico">🧩</span><div><div class="t-label">主线任务</div><div class="t-val">一起去拼豆！</div></div></div>
+        <div class="trow"><span class="t-ico" id="sum-dinner-ico">🍽️</span><div><div class="t-label">今晚干饭</div><div class="t-val" id="sum-dinner">—</div></div></div>
+      </div>
+      <div class="ticket-cut"></div>
+      <div class="ticket-foot">凭此券可兑换一次超级开心的约会<br>永久有效 · 不可反悔 · 记得截图保存哦 📸</div>
+    </div>
+    <button class="btn ghost" id="btn-restart" style="margin-top:4px">🔁 再玩一遍</button>
+  </section>
 
 </div>
 
 <script>
-  /* ---------- floating hearts background ---------- */
-  const heartsContainer = document.getElementById('hearts');
-  const heartEmojis = ['💗','💖','💕','💓','💞'];
-  for (let i = 0; i < 18; i++) {
-    const h = document.createElement('div');
-    h.className = 'heart';
-    h.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
-    h.style.left = Math.random() * 100 + '%';
-    h.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
-    h.style.animationDuration = (8 + Math.random() * 10) + 's';
-    h.style.animationDelay = (Math.random() * 10) + 's';
-    h.style.fontSize = (16 + Math.random() * 20) + 'px';
-    heartsContainer.appendChild(h);
+(function(){
+  'use strict';
+  var state = { ritual:null, ritualIco:'🫶', first:[], dinner:null, dinnerIco:'🍽️', name:'', time:'' };
+  var order = ['s-ritual','s-first','s-main','s-dinner','s-name','s-time'];
+  var busy = false;
+
+  /* ---------- floating hearts ---------- */
+  var glyphs = ['💗','💞','🩷','✨','💖'];
+  for (var i=0;i<9;i++){
+    var f = document.createElement('span');
+    f.className = 'float-heart';
+    f.textContent = glyphs[i % glyphs.length];
+    f.style.left = (5 + Math.random()*90) + 'vw';
+    f.style.fontSize = (14 + Math.random()*16) + 'px';
+    f.style.animationDuration = (9 + Math.random()*9) + 's';
+    f.style.animationDelay = (Math.random()*9) + 's';
+    document.body.appendChild(f);
   }
 
-  /* ---------- step 1: dodging "No" button ---------- */
-  const btnRow = document.getElementById('btnRow');
-  const noBtn = document.getElementById('noBtn');
-  const yesBtn = document.getElementById('yesBtn');
-
-  function dodge() {
-    const rowRect = btnRow.getBoundingClientRect();
-    const btnRect = noBtn.getBoundingClientRect();
-    const maxX = rowRect.width - btnRect.width;
-    const maxY = rowRect.height - btnRect.height;
-    const randX = Math.random() * Math.max(maxX, 0);
-    const randY = Math.random() * Math.max(maxY, 0);
-    noBtn.style.left = randX + 'px';
-    noBtn.style.top = randY + 'px';
+  /* ---------- navigation ---------- */
+  function go(id){
+    if (busy) return;
+    var cur = document.querySelector('.screen.active');
+    var nxt = document.getElementById(id);
+    if (!nxt || nxt === cur) return;
+    busy = true;
+    cur.classList.add('exit');
+    cur.classList.remove('active');
+    nxt.classList.add('active');
+    setTimeout(function(){ cur.classList.remove('exit'); busy = false; }, 520);
+    var step = order.indexOf(id);
+    if (step > -1) renderProgress(nxt, step);
+    if (id === 's-main') buildBeads();
+    if (id === 's-final') { fillSummary(); confetti(); }
   }
-  noBtn.addEventListener('mouseenter', dodge);
-  noBtn.addEventListener('click', (e) => { e.preventDefault(); dodge(); });
-  // touch support
-  noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); dodge(); });
-
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+  function renderProgress(screenEl, step){
+    var box = screenEl.querySelector('[data-prog]');
+    if (!box) return;
+    box.innerHTML = '';
+    for (var i=0;i<order.length;i++){
+      var dot = document.createElement('i');
+      if (i <= step) dot.className = 'on';
+      box.appendChild(dot);
+    }
   }
-
-  yesBtn.addEventListener('click', () => {
-    showScreen('screen-date');
-    buildCalendar();
+  document.querySelectorAll('[data-back]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var cur = document.querySelector('.screen.active');
+      var idx = order.indexOf(cur.id);
+      go(idx <= 0 ? 's-ask' : order[idx-1]);
+    });
+  });
+  document.querySelectorAll('[data-next]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var cur = document.querySelector('.screen.active');
+      var idx = order.indexOf(cur.id);
+      go(idx === order.length-1 ? 's-final' : order[idx+1]);
+    });
   });
 
-  /* ---------- step 2: calendar ---------- */
-  let calMonth, calYear, selectedDate = null;
-  const monthLabel = document.getElementById('monthLabel');
-  const calGrid = document.getElementById('calGrid');
-  const dateConfirm = document.getElementById('dateConfirm');
-  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const dowNames = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+  /* ---------- envelope ---------- */
+  var env = document.getElementById('envelope');
+  env.addEventListener('click', function(){
+    if (env.classList.contains('open')) return;
+    env.classList.add('open');
+    setTimeout(function(){ go('s-ask'); }, 1500);
+  });
 
-  function initCalendar() {
-    const today = new Date();
-    calMonth = today.getMonth();
-    calYear = today.getFullYear();
+  /* ---------- runaway NO button ---------- */
+  var noBtn = document.getElementById('btn-no');
+  var yesBtn = document.getElementById('btn-yes');
+  var tries = 0;
+  var taunts = ['不是','别点我 🙅','再想想？','手滑了吧 😏','真的吗 🥺','点左边那个！','是 在这边 →','我跑得可快了'];
+  function flee(e){
+    if (e.cancelable) e.preventDefault();
+    tries++;
+    var w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+    var pad = 14;
+    var x = pad + Math.random() * (window.innerWidth  - w - pad*2);
+    var y = pad + Math.random() * (window.innerHeight - h - pad*2);
+    noBtn.style.position = 'fixed';
+    noBtn.style.zIndex = 40;
+    noBtn.style.left = x + 'px';
+    noBtn.style.top  = y + 'px';
+    noBtn.textContent = taunts[Math.min(tries, taunts.length-1)];
+    var grow = Math.min(1 + tries*0.06, 1.4);
+    yesBtn.style.transform = 'scale(' + grow + ')';
+    var shrink = Math.max(1 - tries*0.05, 0.7);
+    noBtn.style.transform = 'scale(' + shrink + ')';
   }
+  noBtn.addEventListener('touchstart', flee, {passive:false});
+  noBtn.addEventListener('mouseenter', flee);
+  noBtn.addEventListener('click', flee);
 
-  function buildCalendar() {
-    calGrid.innerHTML = '';
-    monthLabel.textContent = `${monthNames[calMonth]} ${calYear}`;
-    dowNames.forEach(d => {
-      const el = document.createElement('div');
-      el.className = 'dow';
-      el.textContent = d;
-      calGrid.appendChild(el);
-    });
-    const firstDay = new Date(calYear, calMonth, 1).getDay();
-    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    for (let i = 0; i < firstDay; i++) {
-      const el = document.createElement('div');
-      el.className = 'cal-day empty';
-      calGrid.appendChild(el);
-    }
-    for (let d = 1; d <= daysInMonth; d++) {
-      const el = document.createElement('div');
-      el.className = 'cal-day';
-      el.textContent = d;
-      if (selectedDate && selectedDate.getDate() === d &&
-          selectedDate.getMonth() === calMonth && selectedDate.getFullYear() === calYear) {
-        el.classList.add('selected');
-      }
-      el.addEventListener('click', () => {
-        selectedDate = new Date(calYear, calMonth, d);
-        buildCalendar();
+  yesBtn.addEventListener('click', function(e){
+    heartBurst(e.clientX || window.innerWidth/2, e.clientY || window.innerHeight/2);
+    noBtn.style.display = 'none';
+    setTimeout(function(){ go('s-ritual'); }, 450);
+  });
+
+  /* ---------- option groups ---------- */
+  document.querySelectorAll('[data-group]').forEach(function(groupEl){
+    var key = groupEl.getAttribute('data-group');
+    var multi = groupEl.hasAttribute('data-multi');
+    var nextBtn = groupEl.parentElement.querySelector('[data-next]');
+    groupEl.querySelectorAll('.opt').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        if (multi){
+          opt.classList.toggle('on');
+          state[key] = Array.prototype.map.call(groupEl.querySelectorAll('.opt.on'), function(o){ return o.getAttribute('data-val'); });
+          if (nextBtn) nextBtn.disabled = state[key].length === 0;
+        } else {
+          groupEl.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('on'); });
+          opt.classList.add('on');
+          state[key] = opt.getAttribute('data-val');
+          state[key + 'Ico'] = opt.getAttribute('data-ico');
+          if (opt.hasAttribute('data-all')){
+            groupEl.querySelectorAll('.opt:not([data-all])').forEach(function(o,i){
+              setTimeout(function(){ o.classList.add('pulse'); setTimeout(function(){ o.classList.remove('pulse'); },500); }, i*110);
+            });
+          }
+          if (nextBtn) nextBtn.disabled = false;
+        }
       });
-      calGrid.appendChild(el);
+    });
+  });
+
+  /* ---------- bead heart ---------- */
+  var beadColors = ['#FF4D79','#FF7096','#FF8FAB','#FFB3C6','#FB6F92'];
+  var beadsBuilt = false;
+  function buildBeads(){
+    if (beadsBuilt) return;
+    beadsBuilt = true;
+    var board = document.getElementById('beads');
+    var pattern = ['011101110','111111111','111111111','011111110','001111100','000111000','000010000'];
+    var idx = 0;
+    pattern.forEach(function(row){
+      row.split('').forEach(function(c){
+        var b = document.createElement('span');
+        b.className = 'bead' + (c === '0' ? ' empty' : '');
+        if (c === '1'){
+          b.style.background = beadColors[Math.floor(Math.random()*beadColors.length)];
+          b.style.animationDelay = (idx * 0.045) + 's';
+          idx++;
+        }
+        board.appendChild(b);
+      });
+    });
+  }
+
+  /* ---------- name ---------- */
+  var nameInput = document.getElementById('trip-name');
+  var nameNext = document.querySelector('#s-name [data-next]');
+  nameInput.addEventListener('input', function(){
+    state.name = nameInput.value.trim();
+    nameNext.disabled = state.name.length === 0;
+  });
+  document.querySelectorAll('.chip-s').forEach(function(c){
+    c.addEventListener('click', function(){
+      nameInput.value = c.getAttribute('data-fill');
+      nameInput.dispatchEvent(new Event('input'));
+    });
+  });
+
+  /* ---------- time ---------- */
+  var times = ['10:00','11:00','12:00','13:30','14:00','15:00','16:00','17:30','18:00'];
+  var timeGrid = document.getElementById('time-grid');
+  var timeBig  = document.getElementById('time-big');
+  var timeNext = document.querySelector('#s-time [data-next]');
+  var customTime = document.getElementById('time-custom');
+  function setTime(t){
+    state.time = t;
+    timeBig.innerHTML = t + '<small>就这个点，不许迟到 😤</small>';
+    timeNext.disabled = false;
+  }
+  times.forEach(function(t){
+    var b = document.createElement('button');
+    b.className = 'tchip';
+    b.textContent = t;
+    b.addEventListener('click', function(){
+      timeGrid.querySelectorAll('.tchip').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      customTime.value = '';
+      setTime(t);
+    });
+    timeGrid.appendChild(b);
+  });
+  customTime.addEventListener('input', function(){
+    if (!customTime.value) return;
+    timeGrid.querySelectorAll('.tchip').forEach(function(x){ x.classList.remove('on'); });
+    setTime(customTime.value);
+  });
+
+  /* ---------- summary ---------- */
+  function fillSummary(){
+    document.getElementById('sum-name').textContent = state.name || '我们的快乐一日游';
+    document.getElementById('sum-time').textContent = state.time || '待定';
+    document.getElementById('sum-ritual').textContent = state.ritual || '—';
+    document.getElementById('sum-ritual-ico').textContent = state.ritualIco || '🫶';
+    document.getElementById('sum-first').textContent = state.first.length ? state.first.join(' + ') : '—';
+    document.getElementById('sum-dinner').textContent = state.dinner || '—';
+    document.getElementById('sum-dinner-ico').textContent = state.dinnerIco || '🍽️';
+  }
+
+  /* ---------- restart ---------- */
+  document.getElementById('btn-restart').addEventListener('click', function(){
+    window.location.reload();
+  });
+
+  /* ---------- effects ---------- */
+  function confetti(){
+    var colors = ['#FF4D79','#FFB3C6','#FFD166','#8AC6FF','#B39DFF','#7FE0A8'];
+    for (var i=0;i<90;i++){
+      var p = document.createElement('div');
+      p.className = 'confetti';
+      p.style.left = (Math.random()*100) + 'vw';
+      p.style.background = colors[i % colors.length];
+      var s = 6 + Math.random()*7;
+      p.style.width = s + 'px';
+      p.style.height = (s*1.5) + 'px';
+      p.style.animationDuration = (2.4 + Math.random()*1.8) + 's';
+      p.style.animationDelay = (Math.random()*0.9) + 's';
+      document.body.appendChild(p);
+      (function(el){ setTimeout(function(){ el.remove(); }, 5200); })(p);
     }
   }
-
-  document.getElementById('prevMonth').addEventListener('click', () => {
-    calMonth--;
-    if (calMonth < 0) { calMonth = 11; calYear--; }
-    buildCalendar();
-  });
-  document.getElementById('nextMonth').addEventListener('click', () => {
-    calMonth++;
-    if (calMonth > 11) { calMonth = 0; calYear++; }
-    buildCalendar();
-  });
-
-  dateConfirm.addEventListener('click', () => {
-    if (!selectedDate) selectedDate = new Date();
-    showScreen('screen-time');
-    buildTimePicker();
-  });
-
-  /* ---------- step 3: time picker ---------- */
-  const hourCol = document.getElementById('hourCol');
-  const minCol = document.getElementById('minCol');
-  const ampmCol = document.getElementById('ampmCol');
-
-  const HOURS = Array.from({length:12}, (_,i)=> i+1);
-  const MINS = Array.from({length:12}, (_,i)=> (i*5).toString().padStart(2,'0'));
-  const AMPM = ['AM','PM'];
-
-  let timePickerBuilt = false;
-
-  // Find the .opt element closest to the vertical center of the column,
-  // mark it active, and return it.
-  function updateActive(col) {
-    const colRect = col.getBoundingClientRect();
-    const center = colRect.top + colRect.height / 2;
-    let closest = null;
-    let closestDist = Infinity;
-    col.querySelectorAll('.opt').forEach(opt => {
-      const r = opt.getBoundingClientRect();
-      const optCenter = r.top + r.height / 2;
-      const dist = Math.abs(optCenter - center);
-      opt.classList.remove('active');
-      if (dist < closestDist) {
-        closestDist = dist;
-        closest = opt;
-      }
-    });
-    if (closest) closest.classList.add('active');
-    return closest;
+  function heartBurst(cx, cy){
+    for (var i=0;i<14;i++){
+      var h = document.createElement('span');
+      h.className = 'burst';
+      h.textContent = ['❤️','💖','💘','✨'][i % 4];
+      h.style.left = cx + 'px';
+      h.style.top  = cy + 'px';
+      var ang = Math.random() * Math.PI * 2;
+      var dist = 70 + Math.random()*90;
+      h.style.setProperty('--tx', Math.cos(ang)*dist + 'px');
+      h.style.setProperty('--ty', Math.sin(ang)*dist + 'px');
+      document.body.appendChild(h);
+      (function(el){ setTimeout(function(){ el.remove(); }, 950); })(h);
+    }
   }
-
-  function fillCol(col, items, defaultIndex) {
-    const padTop = document.createElement('div');
-    padTop.className = 'pad';
-    col.appendChild(padTop);
-
-    items.forEach(item => {
-      const el = document.createElement('div');
-      el.className = 'opt';
-      el.textContent = item;
-      col.appendChild(el);
-    });
-
-    const padBottom = document.createElement('div');
-    padBottom.className = 'pad';
-    col.appendChild(padBottom);
-
-    col.addEventListener('scroll', () => updateActive(col));
-
-    // set initial scroll position so the default item is centered
-    col.scrollTop = defaultIndex * 40;
-  }
-
-  function buildTimePicker() {
-    if (timePickerBuilt) return; // build once
-    timePickerBuilt = true;
-
-    fillCol(hourCol, HOURS, 6);   // default ~ 7
-    fillCol(minCol, MINS, 0);     // default 00
-    fillCol(ampmCol, AMPM, 1);    // default PM
-
-    // The screen is hidden (display:none) when this runs the first time,
-    // so scrollTop assignments and getBoundingClientRect above are not
-    // reliable yet. Re-apply once the screen is actually visible.
-    requestAnimationFrame(() => {
-      hourCol.scrollTop = 6 * 40;
-      minCol.scrollTop = 0 * 40;
-      ampmCol.scrollTop = 1 * 40;
-      updateActive(hourCol);
-      updateActive(minCol);
-      updateActive(ampmCol);
-    });
-  }
-
-  function getTimeValue(col, items) {
-    const active = col.querySelector('.opt.active') || updateActive(col);
-    if (!active) return items[0];
-    const idx = [...col.querySelectorAll('.opt')].indexOf(active);
-    return items[Math.min(Math.max(idx, 0), items.length - 1)];
-  }
-
-  document.getElementById('timeConfirm').addEventListener('click', () => {
-    showScreen('screen-vibe');
-  });
-
-  /* ---------- step 4: vibe picker ---------- */
-  const vibeGrid = document.getElementById('vibeGrid');
-  const vibeConfirm = document.getElementById('vibeConfirm');
-  let selectedVibe = null;
-
-  vibeGrid.querySelectorAll('.vibe-item').forEach(item => {
-    item.addEventListener('click', () => {
-      vibeGrid.querySelectorAll('.vibe-item').forEach(i => i.classList.remove('selected'));
-      item.classList.add('selected');
-      selectedVibe = item.dataset.vibe;
-      vibeConfirm.textContent = '约定啦！Let\'s go ✓';
-      vibeConfirm.classList.add('ready');
-    });
-  });
-
-  vibeConfirm.addEventListener('click', () => {
-    if (!selectedVibe) return;
-    finalize();
-    showScreen('screen-final');
-  });
-
-  /* ---------- step 5: final summary ---------- */
-  function finalize() {
-    const h = getTimeValue(hourCol, HOURS);
-    const m = getTimeValue(minCol, MINS);
-    const a = getTimeValue(ampmCol, AMPM);
-
-    document.getElementById('finalDate').textContent =
-      selectedDate.toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
-    document.getElementById('finalTime').textContent = `${h}:${m} ${a}`;
-    document.getElementById('finalVibe').textContent = selectedVibe;
-  }
-
-  document.getElementById('restartBtn').addEventListener('click', () => {
-    selectedDate = null;
-    selectedVibe = null;
-    vibeGrid.querySelectorAll('.vibe-item').forEach(i => i.classList.remove('selected'));
-    vibeConfirm.textContent = 'Pick one first';
-    vibeConfirm.classList.remove('ready');
-    noBtn.style.left = '';
-    noBtn.style.top = '';
-    initCalendar();
-    showScreen('screen-ask');
-  });
-
-  initCalendar();
+})();
 </script>
 </body>
 </html>
